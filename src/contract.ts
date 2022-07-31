@@ -27,6 +27,18 @@ export abstract class Contract {
         }
     }
 
+    protected static async _deploySendTransaction<T>(this: ContractClass<T>, linkArgs: { [placeholder: string]: string }, ctorArgs: unknown[], overrides: CallOverrides) {
+        try {
+            const { from, ...overridesWithoutFrom } = { ...DefaultOverrides, ...overrides };
+            const signer = getProvider().getSigner(await from);
+            const bytecode = Object.entries(linkArgs).reduce((bytecode, [ placeholder, address ]) => bytecode.replaceAll(placeholder, address.slice(2)), this.BYTECODE);
+            const factory = new ethers.ContractFactory(this.ABI, bytecode, signer);
+            return (await factory.deploy(...ctorArgs, overridesWithoutFrom)).deployTransaction.hash;
+        } catch (error) {
+            throw decodeError(error);
+        }
+    }
+
     protected static async _deployStatic(this: ContractClass<unknown>, linkArgs: { [placeholder: string]: string }, ctorArgs: unknown[], overrides: CallOverrides) {
         try {
             const { from, ...overridesWithoutFrom } = { ...DefaultOverrides, ...overrides };
@@ -70,6 +82,17 @@ export abstract class Contract {
             const signer = getProvider().getSigner(await from);
             const response = await this._contract.connect(signer)[method](...args, overridesWithoutFrom);
             return new Transaction(response, await response.wait());
+        } catch (error) {
+            throw decodeError(error);
+        }
+    }
+
+    protected async _sendTransaction(method: string, args: unknown[], overrides: CallOverrides) {
+        try {
+            const { from, ...overridesWithoutFrom } = { ...DefaultOverrides, ...overrides };
+            const signer = getProvider().getSigner(await from);
+            const response = await this._contract.connect(signer)[method](...args, overridesWithoutFrom);
+            return response.hash;
         } catch (error) {
             throw decodeError(error);
         }

@@ -1,10 +1,18 @@
 import * as ethers from 'ethers';
 import { ContractEvent } from './event-handler';
+import { getProvider } from './provider';
 
 type TransactionResponse = ethers.providers.TransactionResponse;
 type TransactionReceipt = ethers.providers.TransactionReceipt;
 
 export class Transaction {
+    static async get(hash: string) {
+        const provider = getProvider();
+        const receipt = await provider.waitForTransaction(hash);
+        const response = await provider.getTransaction(hash);
+        return new this(response, receipt);
+    }
+
     private readonly _response: TransactionResponse;
 
     private readonly _receipt: TransactionReceipt;
