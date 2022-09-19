@@ -34,6 +34,12 @@ export class Transaction {
         return this._receipt.contractAddress;
     }
 
+    get transactionCost() {
+        const gasUsed = this._receipt.gasUsed.toBigInt();
+        const effectiveGasPrice = this._receipt.effectiveGasPrice.toBigInt();
+        return gasUsed * effectiveGasPrice;
+    }
+
     async wait(confirmations: number): Promise<void> {
         await this._response.wait(confirmations);
     }
