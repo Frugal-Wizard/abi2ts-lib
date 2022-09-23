@@ -57,31 +57,41 @@ export function registerError({ sig, factory, encode }: ErrorDefinition): void {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function decodeError(error: any): unknown {
-    if (error.errorSignature) {
-        const { errorSignature, errorName, errorArgs } = error;
-        const sighash = getSighash(errorSignature);
-        const { factory } = errorRegistry[sighash] || {};
-        if (factory) {
-            return factory(...errorArgs);
+    try {
+        if (error.errorSignature) {
+            const { errorSignature, errorName, errorArgs } = error;
+            const sighash = getSighash(errorSignature);
+            const { factory } = errorRegistry[sighash] || {};
+            if (factory) {
+                return factory(...errorArgs);
+            } else {
+                return Object.assign(new Error(`${errorName}(${errorArgs.join(', ')})`), {
+                    name: errorName,
+                    args: errorArgs,
+                });
+            }
+
+        } else if (error.error?.data) {
+            const data = error.error.data.result ?? error.error.data;
+            if (data == '0x') {
+                return error;
+            }
+            return decodeErrorData(data);
+
+        } else if (error.error?.results) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const [ { return: data } ] = Object.values<any>(error.error.results);
+            if (data == '0x') {
+                return error;
+            }
+            return decodeErrorData(data);
+
         } else {
-            return Object.assign(new Error(`${errorName}(${errorArgs.join(', ')})`), {
-                name: errorName,
-                args: errorArgs,
-            });
-        }
-    } else if (error.error?.data) {
-        const data = error.error.data.result ?? error.error.data;
-        if (data == '0x') {
             return error;
         }
-        return decodeErrorData(data);
-    } else if (error.error?.results) {
-        const [ { return: data } ] = Object.values(error.error.results);
-        if (data == '0x') {
-            return error;
-        }
-        return decodeErrorData(data);
-    } else {
+
+    } catch (decodingError) {
+        console.error(decodingError);
         return error;
     }
 }
