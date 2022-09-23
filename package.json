@@ -7,7 +7,9 @@
   "main": "dist/abi2ts-lib.js",
   "repository": "https://github.com/TheOrderbookDEX/abi2ts-lib.git",
   "scripts": {
-    "prepare": "gulp"
+    "prepare": "gulp",
+    "lint": "eslint . --ext .ts",
+    "typecheck": "tsc"
   },
   "dependencies": {
     "ethers": "^5.6.9"
