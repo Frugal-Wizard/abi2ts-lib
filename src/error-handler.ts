@@ -72,7 +72,7 @@ export function decodeError(error: any): unknown {
             }
 
         } else if (error.error?.data) {
-            const data = error.error.data.result ?? error.error.data;
+            const data = error.error.data.data ?? error.error.data.result ?? error.error.data;
             if (data == '0x') {
                 return error;
             }
