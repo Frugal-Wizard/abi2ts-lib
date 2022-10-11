@@ -55,6 +55,11 @@ export abstract class ContractEvent {
         return this.log.topics;
     }
 
+    protected get decodedLog() {
+        const fragment = ethers.utils.Fragment.from(this.sig as string) as ethers.utils.EventFragment;
+        return new ethers.utils.Interface([ fragment ]).decodeEventLog(fragment, this.log.data, this.log.topics);
+    }
+
     static register(event: { TOPIC: string, new(log: Log): ContractEvent }): void {
         if (!eventRegistry[event.TOPIC]) {
             eventRegistry[event.TOPIC] = event;
