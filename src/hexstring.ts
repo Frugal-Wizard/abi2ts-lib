@@ -1,4 +1,4 @@
-export function hexstring(value: bigint): string {
+export function hexstring(value: bigint | number): string {
     return `0x${value.toString(16)}`;
 }
 
