@@ -8,6 +8,7 @@
   "repository": "https://github.com/Frugal-Wizard/abi2ts-lib.git",
   "scripts": {
     "prepare": "gulp",
+    "test": "gulp test",
     "lint": "eslint . --ext .ts",
     "typecheck": "tsc"
   },
