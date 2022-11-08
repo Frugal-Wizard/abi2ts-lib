@@ -12,15 +12,15 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "ethers": "^5.7.1"
+    "ethers": "^5.7.2"
   },
   "devDependencies": {
     "@types/gulp": "^4.0.9",
-    "@types/node": "^18.8.4",
+    "@types/node": "^18.11.9",
     "@types/rimraf": "^3.0.2",
-    "@typescript-eslint/eslint-plugin": "^5.40.0",
-    "@typescript-eslint/parser": "^5.40.0",
-    "eslint": "^8.25.0",
+    "@typescript-eslint/eslint-plugin": "^5.42.1",
+    "@typescript-eslint/parser": "^5.42.1",
+    "eslint": "^8.27.0",
     "gulp": "^4.0.2",
     "rimraf": "^3.0.2",
     "ts-node": "^10.9.1",
