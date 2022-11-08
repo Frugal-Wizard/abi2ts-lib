@@ -41,3 +41,7 @@ export async function predictContractAddress(from: string, nonceOffset = 0) {
     const nonce = await getProvider().getTransactionCount(from) + nonceOffset;
     return ethers.utils.getContractAddress({ from, nonce });
 }
+
+export async function getStorageSlot(address: string, slot: string) {
+    return await getProvider().getStorageAt(address, slot);
+}

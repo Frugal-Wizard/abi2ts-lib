@@ -4,10 +4,18 @@
 // going through ethers' contract objects.
 
 import * as ethers from 'ethers';
+import { hasProperty, isArray, isNumber, isObject, isString } from './type-utils';
 
 const { utils: { toUtf8Bytes, keccak256, hexDataSlice, defaultAbiCoder } } = ethers;
 
 type BytesLike = ethers.BytesLike;
+
+export class OutOfGas extends Error {
+    constructor() {
+        super('Out of gas');
+        this.name = 'OutOfGas';
+    }
+}
 
 export abstract class ContractError extends Error {
     abstract get sig(): string | undefined;
@@ -55,10 +63,48 @@ export function registerError({ sig, factory, encode }: ErrorDefinition): void {
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function decodeError(error: any): unknown {
+interface EthersDecodedError {
+    errorSignature: string;
+    errorName: string;
+    errorArgs: unknown[];
+}
+
+function isEthersDecodedError(error: unknown): error is EthersDecodedError {
+    return isObject(error)
+        && hasProperty(error, 'errorSignature', isString)
+        && hasProperty(error, 'errorName', isString)
+        && hasProperty(error, 'errorArgs', isArray);
+}
+
+function searchForError(error: unknown): unknown {
+    if (!isObject(error)) return;
+    if (
+        hasProperty(error, 'message', isString) &&
+        hasProperty(error, 'code', isNumber) &&
+        hasProperty(error, 'data', isString)
+    ) {
+        if (
+            error.message.includes('revert') &&
+            /^0x[0-9a-fA-F]*$/.test(error.data)
+        ) {
+            return decodeErrorData(error.data);
+
+        } else if (
+            error.message.includes('out of gas')
+        ) {
+            return new OutOfGas();
+        }
+    }
+
+    for (const value of Object.values(error)) {
+        const error = searchForError(value);
+        if (error) return error;
+    }
+}
+
+export function decodeError(error: unknown): unknown {
     try {
-        if (error.errorSignature) {
+        if (isEthersDecodedError(error)) {
             const { errorSignature, errorName, errorArgs } = error;
             const sighash = getSighash(errorSignature);
             const { factory } = errorRegistry[sighash] || {};
@@ -71,23 +117,8 @@ export function decodeError(error: any): unknown {
                 });
             }
 
-        } else if (error.error?.data) {
-            const data = error.error.data.data ?? error.error.data.result ?? error.error.data;
-            if (data == '0x') {
-                return error;
-            }
-            return decodeErrorData(data);
-
-        } else if (error.error?.results) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const [ { return: data } ] = Object.values<any>(error.error.results);
-            if (data == '0x') {
-                return error;
-            }
-            return decodeErrorData(data);
-
         } else {
-            return error;
+            return searchForError(error);
         }
 
     } catch (decodingError) {
@@ -97,6 +128,9 @@ export function decodeError(error: any): unknown {
 }
 
 export function decodeErrorData(data: unknown): unknown {
+    if (data == '0x') {
+        return new RevertWithoutReason();
+    }
     const sighash = hexDataSlice(data as BytesLike, 0, 4);
     const { types, factory } = errorRegistry[sighash] || {};
     if (factory) {
@@ -117,6 +151,21 @@ export class UnknownError extends ContractError {
         super(data);
         this.name = 'UnknownError';
         this.data = data;
+    }
+}
+
+export class RevertWithoutReason extends ContractError {
+    get sig() {
+        return undefined;
+    }
+
+    constructor() {
+        super('RevertWithoutReason');
+        this.name = 'RevertWithoutReason';
+    }
+
+    encode() {
+        return '0x';
     }
 }
 

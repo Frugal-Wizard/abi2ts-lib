@@ -16,6 +16,15 @@
             }
         },
         {
+            "label": "Test",
+            "type": "npm",
+            "script": "test",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
             "label": "Lint",
             "type": "npm",
             "script": "lint",
