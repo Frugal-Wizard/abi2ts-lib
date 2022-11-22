@@ -28,7 +28,7 @@ export function hasProperty<T, K extends string | number | symbol, P>(
     typeConstraint: (value: unknown) => value is P
 ): value is T & { [k in K]: P };
 
-export function hasProperty<T, K extends string | number | symbol, P>(
+export function hasProperty<T extends object, K extends string | number | symbol, P>(
     value: T,
     key: K,
     typeConstraint?: (value: unknown) => value is P
