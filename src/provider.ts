@@ -34,7 +34,7 @@ export async function getBalance(address: string): Promise<bigint> {
 }
 
 export async function getLogs(filter: ethers.providers.Filter) {
-    return await getProvider().getLogs(filter);
+    return await getProvider().getLogs({ ...filter, fromBlock: filter.fromBlock ?? 0 });
 }
 
 export async function predictContractAddress(from: string, nonceOffset = 0) {
