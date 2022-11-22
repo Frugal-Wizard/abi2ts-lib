@@ -77,7 +77,8 @@ function isEthersDecodedError(error: unknown): error is EthersDecodedError {
 }
 
 function searchForError(error: unknown): unknown {
-    if (!isObject(error)) return;
+    if (!isObject(error)) return error;
+
     if (
         hasProperty(error, 'message', isString) &&
         hasProperty(error, 'code', isNumber) &&
@@ -98,8 +99,10 @@ function searchForError(error: unknown): unknown {
 
     for (const value of Object.values(error)) {
         const error = searchForError(value);
-        if (error) return error;
+        if (error !== value) return error;
     }
+
+    return error;
 }
 
 export function decodeError(error: unknown): unknown {
