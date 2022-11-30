@@ -6,11 +6,17 @@ type TransactionResponse = ethers.providers.TransactionResponse;
 type TransactionReceipt = ethers.providers.TransactionReceipt;
 
 export class Transaction {
-    static async get(hash: string) {
-        const provider = getProvider();
-        const receipt = await provider.waitForTransaction(hash);
-        const response = await provider.getTransaction(hash);
-        return new this(response, receipt);
+    static async get(hash: string, abortSignal?: AbortSignal) {
+        try {
+            const provider = getProvider();
+            const receipt = await provider.waitForTransaction(hash);
+            const response = await provider.getTransaction(hash);
+            return new this(response, receipt);
+
+        } finally {
+            // eslint-disable-next-line no-unsafe-finally
+            if (abortSignal?.aborted) throw abortSignal.reason;
+        }
     }
 
     private readonly _response: TransactionResponse;
@@ -40,7 +46,13 @@ export class Transaction {
         return gasUsed * effectiveGasPrice;
     }
 
-    async wait(confirmations: number): Promise<void> {
-        await this._response.wait(confirmations);
+    async wait(confirmations: number, abortSignal?: AbortSignal): Promise<void> {
+        try {
+            await this._response.wait(confirmations);
+
+        } finally {
+            // eslint-disable-next-line no-unsafe-finally
+            if (abortSignal?.aborted) throw abortSignal.reason;
+        }
     }
 }

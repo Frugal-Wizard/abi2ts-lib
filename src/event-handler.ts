@@ -74,13 +74,13 @@ export abstract class ContractEvent {
         }
     }
 
-    static async * get(filter: ContractEventFilter): AsyncIterable<ContractEvent> {
+    static async * get(filter: ContractEventFilter, abortSignal?: AbortSignal): AsyncIterable<ContractEvent> {
         for (const log of await getLogs({
             address: filter.address,
             fromBlock: filter.fromBlock,
             toBlock: filter.toBlock,
             topics: [ filter.events?.map(({ TOPIC }) => TOPIC) ?? null ],
-        })) {
+        }, abortSignal)) {
             yield this.decode(log);
         }
     }
