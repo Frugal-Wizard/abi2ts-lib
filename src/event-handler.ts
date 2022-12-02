@@ -81,7 +81,13 @@ export abstract class ContractEvent {
             toBlock: filter.toBlock,
             topics: [ filter.events?.map(({ TOPIC }) => TOPIC) ?? null ],
         }, abortSignal)) {
-            yield this.decode(log);
+            try {
+                yield this.decode(log);
+
+            } finally {
+                // eslint-disable-next-line no-unsafe-finally
+                if (abortSignal?.aborted) throw abortSignal.reason;
+            }
         }
     }
 }
