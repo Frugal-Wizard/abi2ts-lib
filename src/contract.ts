@@ -12,14 +12,14 @@ interface ContractClass<T> {
     readonly BYTECODE: string;
 }
 
-type Options = CallOverrides & {
+export type CallOptions = CallOverrides & {
     abortSignal?: AbortSignal;
 };
 
 export abstract class Contract {
     constructor(protected readonly _contract: ethers.Contract) {}
 
-    protected static async _deploy<T>(this: ContractClass<T>, linkArgs: { [placeholder: string]: string }, ctorArgs: unknown[], options: Options) {
+    protected static async _deploy<T>(this: ContractClass<T>, linkArgs: { [placeholder: string]: string }, ctorArgs: unknown[], options: CallOptions) {
         const { from, abortSignal, ...rest } = { ...DefaultOverrides, ...options };
         try {
             const signer = getProvider().getSigner(await from);
@@ -36,7 +36,7 @@ export abstract class Contract {
         }
     }
 
-    protected static async _deploySendTransaction<T>(this: ContractClass<T>, linkArgs: { [placeholder: string]: string }, ctorArgs: unknown[], options: Options) {
+    protected static async _deploySendTransaction<T>(this: ContractClass<T>, linkArgs: { [placeholder: string]: string }, ctorArgs: unknown[], options: CallOptions) {
         const { from, abortSignal, ...rest } = { ...DefaultOverrides, ...options };
         try {
             const signer = getProvider().getSigner(await from);
@@ -53,7 +53,7 @@ export abstract class Contract {
         }
     }
 
-    protected static async _deployStatic(this: ContractClass<unknown>, linkArgs: { [placeholder: string]: string }, ctorArgs: unknown[], options: Options) {
+    protected static async _deployStatic(this: ContractClass<unknown>, linkArgs: { [placeholder: string]: string }, ctorArgs: unknown[], options: CallOptions) {
         const { from, abortSignal, ...rest } = { ...DefaultOverrides, ...options };
         try {
             const signer = getProvider().getSigner(await from);
@@ -71,7 +71,7 @@ export abstract class Contract {
         }
     }
 
-    protected static async _deployPopulateTransaction(this: ContractClass<unknown>, linkArgs: { [placeholder: string]: string }, ctorArgs: unknown[], options: Options) {
+    protected static async _deployPopulateTransaction(this: ContractClass<unknown>, linkArgs: { [placeholder: string]: string }, ctorArgs: unknown[], options: CallOptions) {
         const { from, abortSignal, ...rest } = { ...DefaultOverrides, ...options };
         try {
             const signer = getProvider().getSigner(await from);
@@ -106,7 +106,7 @@ export abstract class Contract {
         }
     }
 
-    protected async _call(method: string, args: unknown[], options: Options) {
+    protected async _call(method: string, args: unknown[], options: CallOptions) {
         const { from, abortSignal, ...rest } = { ...DefaultOverrides, ...options };
         try {
             const signer = getProvider().getSigner(await from);
@@ -122,7 +122,7 @@ export abstract class Contract {
         }
     }
 
-    protected async _sendTransaction(method: string, args: unknown[], options: Options) {
+    protected async _sendTransaction(method: string, args: unknown[], options: CallOptions) {
         const { from, abortSignal, ...overridesWithoutFrom } = { ...DefaultOverrides, ...options };
         try {
             const signer = getProvider().getSigner(await from);
@@ -138,7 +138,7 @@ export abstract class Contract {
         }
     }
 
-    protected async _callStatic(method: string, args: unknown[], options: Options) {
+    protected async _callStatic(method: string, args: unknown[], options: CallOptions) {
         const { abortSignal, ...rest } = { ...DefaultOverrides, ...options };
         try {
             if (!rest.from) [ rest.from ] = await getAccounts();
@@ -153,7 +153,7 @@ export abstract class Contract {
         }
     }
 
-    protected async _populateTransaction(method: string, args: unknown[], options: Options) {
+    protected async _populateTransaction(method: string, args: unknown[], options: CallOptions) {
         const { abortSignal, ...rest } = { ...DefaultOverrides, ...options };
         try {
             return await this._contract.populateTransaction[method](...args, rest);
@@ -167,7 +167,7 @@ export abstract class Contract {
         }
     }
 
-    protected async _estimateGas(method: string, args: unknown[], options: Options) {
+    protected async _estimateGas(method: string, args: unknown[], options: CallOptions) {
         const { abortSignal, ...rest } = { ...DefaultOverrides, ...options };
         try {
             if (!rest.from) [ rest.from ] = await getAccounts();
