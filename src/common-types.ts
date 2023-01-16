@@ -9,3 +9,5 @@ export type Address = string;
 export interface HasAddress {
     address: Address;
 }
+
+export type Addressable = Address | HasAddress;
