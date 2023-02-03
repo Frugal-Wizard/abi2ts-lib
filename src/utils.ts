@@ -33,3 +33,11 @@ export function encodeCall(name: string, argTypes: string[], argValues: unknown[
     const encodedArgs = abiencode(argTypes, argValues);
     return ethers.utils.hexConcat([ selector, encodedArgs ]);
 }
+
+export function digestTypedData(
+  domain: ethers.TypedDataDomain,
+  types: Record<string, ethers.TypedDataField[]>,
+  data: Record<string, unknown>
+) {
+  return ethers.utils._TypedDataEncoder.hash(domain, types, data);
+}
