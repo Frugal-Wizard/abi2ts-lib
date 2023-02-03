@@ -27,3 +27,9 @@ function recursiveCastBigNumberToBigInt(data: unknown): unknown {
 export function abidecode(types: string[], data: string): unknown {
     return recursiveCastBigNumberToBigInt(ethers.utils.defaultAbiCoder.decode(types, data));
 }
+
+export function encodeCall(name: string, argTypes: string[], argValues: unknown[]): string {
+    const selector = ethers.utils.hexDataSlice(ethers.utils.id(`${name}(${argTypes.join(',')})`), 0, 4);
+    const encodedArgs = abiencode(argTypes, argValues);
+    return ethers.utils.hexConcat([ selector, encodedArgs ]);
+}
