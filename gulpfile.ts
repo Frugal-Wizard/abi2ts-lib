@@ -5,12 +5,9 @@ import * as File from 'vinyl';
 import solc from '@frugal-wizard/solidity-compiler-wrapper';
 import log from 'fancy-log';
 import rimraf from 'rimraf';
-import { promisify } from 'util';
-
-const promisifiedRimraf = promisify(rimraf);
 
 export async function clean() {
-    await promisifiedRimraf('dist/**');
+    await rimraf('dist');
 }
 
 export function compileTypescript() {
@@ -22,7 +19,7 @@ export default function build(done: () => void) {
 }
 
 export async function cleanTest() {
-    await promisifiedRimraf('test/artifacts/**');
+    await rimraf('test/artifacts');
 }
 
 export function compileTestContracts() {
