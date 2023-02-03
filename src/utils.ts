@@ -41,3 +41,7 @@ export function digestTypedData(
 ) {
   return ethers.utils._TypedDataEncoder.hash(domain, types, data);
 }
+
+export function ecrecover(digest: string, signature: string) {
+  return ethers.utils.recoverAddress(digest, signature);
+}
