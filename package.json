@@ -8,10 +8,10 @@
   "repository": "https://github.com/Frugal-Wizard/abi2ts-lib.git",
   "scripts": {
     "clean": "rimraf dist",
-    "compile": "npx tsc -p src",
+    "compile": "tsc -p src",
     "build": "run-s clean compile",
     "test:clean": "rimraf test/artifacts",
-    "test:solc": "ts-node solc.ts test/contracts test/artifacts",
+    "test:solc": "wsolc --optimize --output-dir test/artifacts test/contracts",
     "test:mocha": "mocha",
     "prepare": "npm run build",
     "test": "run-s test:clean test:solc test:mocha",
@@ -22,7 +22,7 @@
     "ethers": "^5.7.2"
   },
   "devDependencies": {
-    "@frugal-wizard/solidity-compiler-wrapper": "^1.1.0",
+    "@frugal-wizard/solidity-compiler-wrapper": "^1.2.0",
     "@types/chai": "^4.3.4",
     "@types/chai-as-promised": "^7.1.5",
     "@types/mocha": "^10.0.1",
@@ -35,7 +35,6 @@
     "chai-as-promised": "^7.1.1",
     "eslint": "^8.33.0",
     "ganache": "^7.7.4",
-    "glob": "^8.1.0",
     "mocha": "^10.2.0",
     "mochawesome": "^7.1.3",
     "npm-run-all": "^4.1.5",
