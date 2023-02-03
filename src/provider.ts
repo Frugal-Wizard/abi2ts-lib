@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import { hexstring } from './hexstring';
+import { recursiveCastBigIntToString } from './internal-utils';
 
 let ethereum: ethers.providers.ExternalProvider;
 let provider: ethers.providers.JsonRpcProvider | undefined;
@@ -103,6 +104,31 @@ export async function sendETH(from: string, to: string, value: bigint, abortSign
             value: hexstring(value),
         });
         await tx.wait();
+
+    } finally {
+        // eslint-disable-next-line no-unsafe-finally
+        if (abortSignal?.aborted) throw abortSignal.reason;
+    }
+}
+
+export async function signTypedData(
+    account: string,
+    domain: ethers.TypedDataDomain,
+    types: Record<string, ethers.TypedDataField[]>,
+    data: Record<string, unknown>,
+    abortSignal?: AbortSignal
+) {
+    try {
+        const payload = ethers.utils._TypedDataEncoder.getPayload(
+            domain,
+            types,
+            recursiveCastBigIntToString(data) as Record<string, unknown>
+        );
+        if (ethereum.isMetaMask) {
+            return await getProvider().send('eth_signTypedData_v4', [ account, JSON.stringify(payload) ]);
+        } else {
+            return await getProvider().send('eth_signTypedData_v4', [ account, payload ]);
+        }
 
     } finally {
         // eslint-disable-next-line no-unsafe-finally
