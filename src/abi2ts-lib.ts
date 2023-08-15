@@ -1,3 +1,4 @@
+export * from './abicoder';
 export * from './common-types';
 export * from './constants';
 export * from './contract';
